@@ -2,6 +2,53 @@
 
 This document explains how the codebase is organized for the raylib-based boomer shooter, what classes/files exist, and how to extend gameplay (items/enemies) without diving into code yet.
 
+## Planned Files/Directories (paths)
+- `vara/CMakeLists.txt`
+- `vara/assets/`
+- `vara/assets/maps/`
+- `vara/assets/textures/`
+- `vara/assets/sprites/`
+- `vara/assets/audio/`
+- `vara/docs/` (design, architecture, mapmaker)
+- `vara/src/core/App.cpp`, `App.h`
+- `vara/src/core/Config.cpp`, `Config.h`
+- `vara/src/core/Clock.cpp`, `Clock.h`
+- `vara/src/core/Log.cpp`, `Log.h`
+- `vara/src/core/Rng.cpp`, `Rng.h`
+- `vara/src/platform/Input.cpp`, `Input.h`
+- `vara/src/platform/Window.cpp`, `Window.h`
+- `vara/src/render/Renderer3D.cpp`, `Renderer3D.h`
+- `vara/src/render/BillboardSystem.cpp`, `BillboardSystem.h`
+- `vara/src/render/SpriteAtlas.cpp`, `SpriteAtlas.h`
+- `vara/src/render/ScreenScaler.cpp`, `ScreenScaler.h`
+- `vara/src/render/DebugDraw.cpp`, `DebugDraw.h`
+- `vara/src/world/Level.cpp`, `Level.h`
+- `vara/src/world/CollisionWorld.cpp`, `CollisionWorld.h`
+- `vara/src/world/TriggerSystem.cpp`, `TriggerSystem.h`
+- `vara/src/world/SpawnTable.cpp`, `SpawnTable.h`
+- `vara/src/entities/Entity.cpp`, `Entity.h`
+- `vara/src/entities/Actor.cpp`, `Actor.h`
+- `vara/src/entities/Player.cpp`, `Player.h`
+- `vara/src/entities/Enemy.cpp`, `Enemy.h`
+- `vara/src/entities/EnemyBrain.cpp`, `EnemyBrain.h`
+- `vara/src/entities/Projectile.cpp`, `Projectile.h`
+- `vara/src/entities/Item.cpp`, `Item.h`
+- `vara/src/entities/EntitySystem.cpp`, `EntitySystem.h`
+- `vara/src/entities/EnemyFactory.cpp`, `EnemyFactory.h`
+- `vara/src/entities/ItemFactory.cpp`, `ItemFactory.h`
+- `vara/src/entities/ProjectileFactory.cpp`, `ProjectileFactory.h`
+- `vara/src/gameplay/WeaponSystem.cpp`, `WeaponSystem.h`
+- `vara/src/gameplay/DamageSystem.cpp`, `DamageSystem.h`
+- `vara/src/gameplay/HUDModel.cpp`, `HUDModel.h`
+- `vara/src/gameplay/ObjectiveSystem.cpp`, `ObjectiveSystem.h` (later)
+- `vara/src/audio/AudioSystem.cpp`, `AudioSystem.h`
+- `vara/src/audio/AudioBus.cpp`, `AudioBus.h` (optional)
+- `vara/src/ui/UiRenderer.cpp`, `UiRenderer.h`
+- `vara/src/ui/MenuSystem.cpp`, `MenuSystem.h`
+- `vara/src/tools/map_validate.cpp`
+- `vara/src/tools/mapmaker/` (editor sources and exporters)
+- `vara/tests/` (unit/smoke tests)
+
 ## Directory Layout (planned)
 - `CMakeLists.txt`: build config.
 - `assets/`: maps, textures, sprite sheets, audio.
@@ -13,7 +60,7 @@ This document explains how the codebase is organized for the raylib-based boomer
 - `src/gameplay/`: weapon system, damage rules, HUD model, progression (keys/objectives), difficulty tuning.
 - `src/audio/`: sound registry, playback, panning/attenuation.
 - `src/ui/`: HUD drawing, menus (start/pause/settings), messaging.
-- `src/tools/`: map validator CLI, (later) editor hooks.
+- `src/tools/`: map validator CLI, mapmaker app (editor UI + exporters).
 - `tests/`: unit/smoke tests (map load, config load, collision edge cases).
 
 ## Core Loop
@@ -78,9 +125,12 @@ This document explains how the codebase is organized for the raylib-based boomer
 
 ### Tooling
 - `map-validate` (src/tools/map_validate.cpp): loads map, checks geometry integrity, entity refs, trigger wiring.
+- `mapmaker` (src/tools/mapmaker/…): custom editor that outputs `level.obj` + `level.meta.json`. Features: sector/brush editing, height/ramps, door markers, triggers, waypoints, entity placement, material assignment, export validation.
 
 ## Data & Formats
-- Map: block/brush or grid-based source exported to mesh + metadata (JSON/TOML) including sectors, collision volumes, doors, triggers, waypoints, entity placements.
+- Map: created in mapmaker (sector/brush/grid-based) and exported to mesh + metadata:
+  - Geometry: OBJ with groups per sector/material.
+  - Metadata: JSON/TOML with sectors (heights/material refs), collision AABBs, doors (dir/speed), triggers (volumes/actions), entities (type/pos/facing/params), waypoints/nav graph, materials list.
 - Sprites: sprite sheets with animation definitions (JSON), directional frames optional.
 - Config/save: JSON/TOML for user settings; save files store player state, entities, triggers, RNG seed.
 

@@ -9,7 +9,7 @@
 - Immediate response: steady 60+ FPS at 640x480; low input latency; readable feedback.
 - Clarity: distinct silhouettes, high-contrast sprites, consistent collision using rectangular shapes for actors.
 - Extensibility: clean module seams (rendering, gameplay, input, audio, UI, assets) so new enemies/items/maps are incremental additions.
-- Tool-first: simple map/asset pipeline and hot-reload for rapid iteration.
+- Tool-first: custom mapmaker (exports OBJ + metadata) plus hot-reload for rapid iteration.
 
 ## Tech Targets
 - Language/Platform: C++17, desktop (Linux/macOS/Windows).
@@ -31,7 +31,7 @@
 - Audio: Sound registry, channel management, 2D spatialization.
 - Input: Key bindings, per-frame snapshot (pressed/held), mouse look/turn.
 - UI: HUD, message feed, settings menu (resolution, sensitivity, volume).
-- Tooling: CLI map validator; optional simple editor for blocky geometry placement and entity placement.
+- Tooling: mapmaker app (exports OBJ mesh + metadata), CLI map validator, hot-reload.
 
 ## Game Loop (per frame)
 1) Poll input → build `InputState`.
@@ -75,8 +75,10 @@
 - Menus: start/pause/options; options include resolution list, fullscreen toggle, mouse sensitivity, audio volumes.
 
 ## Tooling & Pipeline
-- Map/Level: Authored as block/brush grid with per-surface materials; exported to mesh + metadata (collision flags, triggers, waypoints, door markers).
-- Validator: `map-validate <mapfile>` checks geometry, collision volumes, entity refs.
+- Mapmaker: Custom editor (top-down/orthographic) to paint sectors/brushes, set floor/ceiling heights, ramps, doors, triggers, waypoints, and place entities. Exports:
+  - `level.obj`: render mesh with named groups per sector/material.
+  - `level.meta.json`: sectors (heights/material ids), collision volumes (AABBs), doors (open dir/speed), triggers (volumes + actions), entities (type/pos/facing/params), waypoints/nav graph, materials list.
+- Validator: `map-validate <mapfile>` checks geometry integrity, collisions, entity references, trigger wiring.
 - Asset bundling: Convert textures/sprites to GPU-ready formats; optional pack file for release.
 - Hot-reload: In dev mode, reload textures/maps on file change; reset to nearest spawn to continue testing.
 
@@ -104,4 +106,4 @@
 5) Audio pass: SFX, music, panning.
 6) Triggers/doors: interactions, keys, spawn triggers.
 7) Settings: resolution/fullscreen menu; save/load config.
-8) Tooling: map validator, hot-reload, perf cleanup.
+8) Tooling: mapmaker MVP (export/import), map validator, hot-reload, perf cleanup.
